@@ -1,41 +1,58 @@
 /**
- * RULE 1: WORST CASE - We assume the 'target' is at the very end.
- * RULE 2: DROP CONSTANTS - O(2n) becomes O(n).
- * RULE 3: DROP NON-DOMINANT TERMS - O(n^2 + n) becomes O(n^2).
+ * University of Pittsburgh Bradford - CIST 0265
+ * Chapter 2: Big O Rules of Thumb (Comprehensive Example)
+ * * This script demonstrates how we simplify algorithm analysis by
+ * identifying dominant terms and dropping constants.
  */
 
-function demonstrateBigORules(items: number[]) {
-    const n = items.length;
+console.log('=== Chapter 2: Big O Rules & Growth Analysis ===\n');
 
-    // SECTION A: O(1) - Constant Time
-    // Accessing an index takes the same time whether n is 10 or 10,000,000.
-    console.log("Middle element:", items[Math.floor(n / 2)]); 
+// ============================================================================
+// The Functions to Analyze
+// ============================================================================
 
-    // SECTION B: O(n) - Linear Time
-    // This loop runs 'n' times. Even if we had two separate loops, 
-    // O(2n) simplifies to O(n).
-    for (let i = 0; i < n; i++) {
-        console.log("Checking item:", items[i]);
+// O(1) - Constant: Independent of n
+const constantOp = <T>(items: T[]): T => items[0];
+
+// O(n) - Linear: Grows directly with n
+const linearOp = <T>(items: T[]): void => {
+    for (let i = 0; i < items.length; i++) { /* O(n) logic */ }
+};
+
+// O(n^2) - Quadratic: Grows by the square of n
+const quadraticOp = <T>(items: T[]): void => {
+    for (let i = 0; i < items.length; i++) {
+        for (let j = 0; j < items.length; j++) { /* O(n^2) logic */ }
     }
+};
 
-    // SECTION C: O(n^2) - Quadratic Time
-    // Nested loops mean for every 1 item, we check 'n' items.
-    // If n=10, this runs 100 times. If n=1000, it runs 1,000,000 times!
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            if (i !== j && items[i] === items[j]) {
-                console.log("Found duplicate!");
-            }
-        }
-    }
+// ============================================================================
+// Performance Comparison Table
+// ============================================================================
+
+interface GrowthData {
+  n: number;
+  constant: number;
+  linear: number;
+  quadratic: number;
 }
 
+const tableData: GrowthData[] = [
+  { n: 10, constant: 1, linear: 10, quadratic: 100 },
+  { n: 100, constant: 1, linear: 100, quadratic: 10000 },
+  { n: 1000, constant: 1, linear: 1000, quadratic: 1000000 }
+];
+
+console.log('Growth Comparison (Number of Operations):');
+console.table(tableData);
+
+console.log('\nAnalysis of combined logic: O(1 + n + n^2)');
+console.log('  • Rule: Drop non-dominant terms.');
+console.log('  • Reason: At n=1,000, the n^2 term is 1,000x larger than the linear term.');
+console.log('  • FINAL GRADE: O(n^2)\n');
+
 /**
- * TOTAL COMPLEXITY ANALYSIS:
- * Section A: O(1)
- * Section B: O(n)
- * Section C: O(n^2)
- * * Logic: O(1 + n + n^2) 
- * Simplification: We keep only the fastest-growing (dominant) term.
- * RESULT: O(n^2)
+ * 🛠️ LAB INSTRUCTIONS FOR STUDENTS:
+ * Run this file using the loader to bridge Node 22 and TypeScript:
+ * node --loader ts-node/esm src/02-bigOnotation/ts/06-rules-example.ts
  */
