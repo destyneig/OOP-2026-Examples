@@ -1,0 +1,24 @@
+{
+  "name": "js-dsa-chapter-1",
+  "version": "1.0.0",
+  "description": "Chapter 1: Introducing Data Structures and Algorithms in JavaScript & TypeScript",
+  "main": "src/01-javascript/01-variables.js",
+"scripts": {
+  "start": "node src/01-javascript/01-variables.js",
+  "build": "tsc",
+  "watch": "tsc -w",
+  "js:01": "node src/01-javascript/01-variables.js",
+  "js:02": "node src/01-javascript/02-operators.js",
+  "js:03": "node src/01-javascript/03-truthy-falsy.js",
+  "js:04": "node src/01-javascript/04-control-structures.js",
+  "js:05": "node src/01-javascript/05-functions.js",
+  "js:06": "node src/01-javascript/06-object-oriented.js",
+  "ts:01": "npx ts-node src/02-typescript/01-hello-world.ts",
+  "ts:02": "npx ts-node src/02-typescript/02-interfaces.ts",
+  "ts:03": "npx ts-node src/02-typescript/03-generics.ts"
+},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
