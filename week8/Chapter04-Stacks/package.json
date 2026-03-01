@@ -1,0 +1,12 @@
+{
+  "name": "week8-chapter04-stacks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chapter 4 Stacks examples with an interactive main menu",
+  "main": "main-menu.js",
+  "scripts": {
+    "start": "node main-menu.js",
+    "menu": "node main-menu.js",
+    "list": "node main-menu.js --list"
+  }
+}
