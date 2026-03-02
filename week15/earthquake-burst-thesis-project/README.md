@@ -1,7 +1,7 @@
-# Minimal Example: Earthquake Day “Burstiness” (USGS API)
+# Project Example: Earthquake Day “Burstiness” (USGS API)
 
 This repo is a **minimal** reference solution for the revised “Data-Driven OOP + Data Structures Mini-Project”.
-It keeps only what the rubric requires: layered OOP, 200+ records, cleaning, 1+ metric, grouping, 1 “what-if” filter, and research-style output.
+It includes layered OOP, 200+ records, cleaning, 1+ metric, grouping, 1 “what-if” filter, and research-style output.
 
 ---
 
@@ -106,7 +106,7 @@ This project uses the **minimum** needed for the requirements:
 
 ## Findings (numbers)
 
-Run the program and copy/paste the final report into your submission.
+Run the program and copy/paste the final report into your submission, and check in as part of the repo.
 
 ---
 
