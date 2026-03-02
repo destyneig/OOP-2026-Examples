@@ -1,0 +1,23 @@
+Example “test run” output (from the unit test’s synthetic dataset)
+
+This shows the required “research-style” output format using synthetic data so the numbers are stable.
+
+Thesis
+  In California, for earthquakes ≥ 4.5, the busiest day in the last N days has at least 3× the average daily count.
+
+Dataset used
+  Name: Synthetic test dataset (unit test evidence)
+
+Methods
+  Group: count earthquakes per day (Map)
+  Metric: burstRatio = maxDaily / avgDaily
+
+Results
+  Records analyzed: 240
+  Days observed: 40
+  Avg daily count: 6
+  Max daily count: 84
+  Burst ratio (max/avg): 14
+
+Conclusion
+  Supported
