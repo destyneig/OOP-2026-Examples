@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fibonacci Stack Visualizer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --navy: #0F1B35;
+    --navy2: #1A2C5B;
+    --navy3: #1E3460;
+    --gold: #F5A623;
+    --teal: #0D7377;
+    --teal2: #14A098;
+    --green: #3DDC84;
+    --red: #E74C3C;
+    --yellow: #F9E547;
+    --white: #FFFFFF;
+    --light: #E8EEF7;
+    --mid: #8BA3C7;
+    --panel: #12234A;
+    --dark: #060F22;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    background: var(--gold);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--navy); }
+  header span { font-size: 14px; font-weight: 600; color: var(--navy); opacity: 0.7; }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid #2A3F6F;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Controls */
+  .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+
+  input[type="number"] {
+    background: var(--navy3);
+    border: 1px solid #3A5080;
+    border-radius: 6px;
+    color: var(--white);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    padding: 8px 14px;
+    width: 90px;
+    outline: none;
+  }
+  input[type="number"]:focus { border-color: var(--teal2); }
+
+  .btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-run { background: var(--teal); color: var(--white); }
+  .btn-run:hover { background: var(--teal2); transform: translateY(-1px); }
+  .btn-iter { background: var(--green); color: var(--navy); }
+  .btn-iter:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-clear { background: var(--navy3); color: var(--mid); border: 1px solid #3A5080; }
+  .btn-clear:hover { color: var(--white); }
+
+  .mode-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .mode-recursive { background: #2D1A1A; color: var(--red); border: 1px solid var(--red); }
+  .mode-iterative { background: #1A2D1A; color: var(--green); border: 1px solid var(--green); }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    background: var(--dark);
+    border: 1px solid #2A3F6F;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 10px; color: var(--mid); text-transform: uppercase; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--white); }
+  .stat-val.good { color: var(--green); }
+  .stat-val.bad { color: var(--red); }
+  .stat-val.warn { color: var(--yellow); }
+
+  /* Stack visualizer */
+  #stack-vis {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 200px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  #stack-vis::-webkit-scrollbar { width: 4px; }
+  #stack-vis::-webkit-scrollbar-thumb { background: var(--navy3); border-radius: 2px; }
+
+  .frame {
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    animation: slideIn 0.12s ease;
+    transition: width 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+  .frame-label { flex: 1; }
+  .frame-depth { font-size: 10px; opacity: 0.6; }
+  .frame-overflow { background: #8B0000 !important; animation: pulse 0.6s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+
+  .stack-empty { color: var(--mid); font-size: 13px; padding: 20px; text-align: center; font-style: italic; }
+
+  /* Call tree */
+  #call-tree {
+    background: var(--dark);
+    border: 1px solid #2A3F6F;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    max-height: 380px;
+    overflow-y: auto;
+    line-height: 1.7;
+    white-space: pre;
+  }
+  #call-tree::-webkit-scrollbar { width: 4px; }
+  #call-tree::-webkit-scrollbar-thumb { background: var(--navy3); border-radius: 2px; }
+
+  /* Error banner */
+  #error-banner {
+    display: none;
+    background: #2D0A0A;
+    border: 1px solid var(--red);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--red);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 12px;
+    animation: slideIn 0.2s ease;
+  }
+
+  /* Comparison table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .compare-table th { background: var(--navy2); color: var(--gold); padding: 7px 10px; text-align: left; font-size: 11px; text-transform: uppercase; }
+  .compare-table td { padding: 7px 10px; border-top: 1px solid #1E3460; color: var(--light); vertical-align: middle; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+  .tag-red { background: #2D1A1A; color: var(--red); }
+  .tag-green { background: #1A2D1A; color: var(--green); }
+  .tag-yellow { background: #2D2D0A; color: var(--yellow); }
+
+  /* Output line */
+  #output-line {
+    background: var(--dark);
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  @media (max-width: 700px) { .main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔢 Fibonacci Stack Visualizer</h1>
+  <span>CIST 0265 OOP — Week 8</span>
+</header>
+
+<div class="main">
+
+  <!-- Controls panel -->
+  <div class="panel full-width">
+    <div class="panel-title">Run Fibonacci</div>
+    <div class="controls">
+      <label style="color:var(--mid);font-size:13px;">n =</label>
+      <input type="number" id="n-input" value="10" min="0" max="30">
+      <button class="btn btn-run" onclick="runRecursive()">▶  Naive Recursive</button>
+      <button class="btn btn-iter" onclick="runIterative()">⚡  Iterative</button>
+      <button class="btn btn-clear" onclick="clearAll()">✕  Clear</button>
+      <span id="mode-badge" class="mode-badge mode-recursive">naive recursive</span>
+    </div>
+    <div id="error-banner"></div>
+    <div id="output-line">Enter a value and click Run…</div>
+  </div>
+
+  <!-- Stack visualizer -->
+  <div class="panel">
+    <div class="panel-title">📚 Call Stack (max depth snapshot)</div>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">result</span><span class="stat-val" id="stat-result">—</span></div>
+      <div class="stat"><span class="stat-label">total calls</span><span class="stat-val" id="stat-calls">—</span></div>
+      <div class="stat"><span class="stat-label">max depth</span><span class="stat-val" id="stat-depth">—</span></div>
+      <div class="stat"><span class="stat-label">big O</span><span class="stat-val" id="stat-bigo">—</span></div>
+    </div>
+    <div id="stack-vis"><div class="stack-empty">Run the visualizer to see the call stack</div></div>
+  </div>
+
+  <!-- Call tree -->
+  <div class="panel">
+    <div class="panel-title">🌳 Call Tree (first 5 levels)</div>
+    <div id="call-tree">Run the visualizer to see the call tree…</div>
+  </div>
+
+  <!-- Comparison table -->
+  <div class="panel full-width">
+    <div class="panel-title">📊 Algorithm Comparison</div>
+    <table class="compare-table">
+      <thead>
+        <tr><th>Approach</th><th>Time Complexity</th><th>Space Complexity</th><th>Stack Overflow Risk</th><th>fib(10) calls</th><th>fib(30) calls</th><th>Recommended?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Naive recursion</strong></td>
+          <td><span class="tag tag-red">O(2ⁿ)</span></td>
+          <td>O(n) stack frames</td>
+          <td><span class="tag tag-red">💥 YES — large n</span></td>
+          <td>177</td>
+          <td>2,692,537</td>
+          <td><span class="tag tag-red">No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Memoized recursion</strong></td>
+          <td><span class="tag tag-yellow">O(n)</span></td>
+          <td>O(n) memo + stack</td>
+          <td><span class="tag tag-yellow">⚠️ Very large n</span></td>
+          <td>19</td>
+          <td>59</td>
+          <td><span class="tag tag-yellow">Sometimes</span></td>
+        </tr>
+        <tr>
+          <td><strong>Iterative loop</strong></td>
+          <td><span class="tag tag-green">O(n)</span></td>
+          <td><span class="tag tag-green">O(1) — no stack!</span></td>
+          <td><span class="tag tag-green">✅ Never</span></td>
+          <td>10</td>
+          <td>30</td>
+          <td><span class="tag tag-green">✅ Yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+let callCount = 0;
+let maxDepth = 0;
+let maxStackSnapshot = [];
+
+function fibRecursive(n, depth = 0, tree = null, prefix = "", isLeft = true) {
+  callCount++;
+  if (depth > maxDepth) {
+    maxDepth = depth;
+    maxStackSnapshot = [];
+    for (let d = 0; d <= depth; d++) maxStackSnapshot.push(`fib(${n + (depth - d)})`);
+    maxStackSnapshot[maxStackSnapshot.length - 1] = `fib(${n})`;
+  }
+
+  if (tree !== null && depth <= 4) {
+    const connector = depth === 0 ? "" : (isLeft ? "├── " : "└── ");
+    const childPrefix = depth === 0 ? "" : (isLeft ? "│   " : "    ");
+    tree.push(prefix + connector + `fib(${n})`);
+    if (n > 1) {
+      fibRecursive(n - 1, depth + 1, tree, prefix + childPrefix, true);
+      fibRecursive(n - 2, depth + 1, tree, prefix + childPrefix, false);
+    }
+  } else if (tree !== null) {
+    // already at max display depth
+  }
+
+  if (n <= 1) return n;
+  return fibRecursive(n - 1, depth + 1, null, "", true) +
+         fibRecursive(n - 2, depth + 1, null, "", false);
+}
+
+function fibIterative(n) {
+  if (n <= 1) return n;
+  let a = 0, b = 1;
+  for (let i = 2; i <= n; i++) [a, b] = [b, a + b];
+  return b;
+}
+
+function getFrameColor(depth, maxD) {
+  const pct = depth / Math.max(maxD, 1);
+  const colors = ["0D7377","14A098","1ABC9C","27AE60","2ECC71","F39C12","E67E22","E74C3C","C0392B","8B0000"];
+  const idx = Math.min(Math.floor(pct * colors.length), colors.length - 1);
+  return colors[idx];
+}
+
+function runRecursive() {
+  const n = parseInt(document.getElementById("n-input").value);
+  clearAll(false);
+
+  document.getElementById("mode-badge").className = "mode-badge mode-recursive";
+  document.getElementById("mode-badge").textContent = "naive recursive";
+
+  const errorBanner = document.getElementById("error-banner");
+
+  if (n > 30) {
+    errorBanner.style.display = "block";
+    errorBanner.textContent = `⚠️  n=${n} would require ${Math.round(Math.pow(2,n)).toLocaleString()}+ calls and likely crash your browser. Try n ≤ 30 for naive recursion.`;
+    document.getElementById("stat-bigo").textContent = "O(2ⁿ)";
+    document.getElementById("stat-bigo").className = "stat-val bad";
+    return;
+  }
+
+  callCount = 0; maxDepth = 0; maxStackSnapshot = [];
+
+  const tree = [];
+  let result;
+  try {
+    result = fibRecursive(n, 0, tree, "", true);
+  } catch(e) {
+    errorBanner.style.display = "block";
+    errorBanner.textContent = `💥 RangeError: Maximum call stack size exceeded — this is a real stack overflow! n=${n} pushed too many frames.`;
+    document.getElementById("stat-bigo").textContent = "OVERFLOW";
+    document.getElementById("stat-bigo").className = "stat-val bad";
+    return;
+  }
+
+  // Stats
+  document.getElementById("stat-result").textContent = result;
+  document.getElementById("stat-result").className = "stat-val good";
+  document.getElementById("stat-calls").textContent = callCount.toLocaleString();
+  document.getElementById("stat-calls").className = callCount > 1000 ? "stat-val bad" : "stat-val warn";
+  document.getElementById("stat-depth").textContent = maxDepth;
+  document.getElementById("stat-depth").className = maxDepth > 15 ? "stat-val bad" : "stat-val warn";
+  document.getElementById("stat-bigo").textContent = "O(2ⁿ)";
+  document.getElementById("stat-bigo").className = "stat-val bad";
+
+  // Stack viz — show deepest path
+  const sv = document.getElementById("stack-vis");
+  sv.innerHTML = "";
+  const frames = [];
+  for (let d = 0; d <= maxDepth; d++) frames.unshift(`fib(${n - d < 0 ? 0 : n - d})`);
+  frames.forEach((label, i) => {
+    const frac = i / frames.length;
+    const w = Math.max(30, 100 - frac * 55);
+    const color = getFrameColor(i, frames.length);
+    const div = document.createElement("div");
+    div.className = "frame" + (i === frames.length - 1 && n > 20 ? " frame-overflow" : "");
+    div.style.cssText = `background:#${color};width:${w}%;`;
+    div.innerHTML = `<span class="frame-label">${label}</span><span class="frame-depth">depth ${i}</span>`;
+    sv.appendChild(div);
+  });
+
+  // Call tree
+  document.getElementById("call-tree").textContent = tree.join("\n") || `fib(${n}) = ${result}`;
+
+  // Output
+  document.getElementById("output-line").textContent =
+    `fib(${n}) = ${result}  |  calls: ${callCount.toLocaleString()}  |  max depth: ${maxDepth}  |  O(2ⁿ) ← exponential!`;
+}
+
+function runIterative() {
+  const n = parseInt(document.getElementById("n-input").value);
+  clearAll(false);
+
+  document.getElementById("mode-badge").className = "mode-badge mode-iterative";
+  document.getElementById("mode-badge").textContent = "iterative O(1) space";
+
+  const result = fibIterative(n);
+  const steps = n;
+
+  document.getElementById("stat-result").textContent = result;
+  document.getElementById("stat-result").className = "stat-val good";
+  document.getElementById("stat-calls").textContent = steps;
+  document.getElementById("stat-calls").className = "stat-val good";
+  document.getElementById("stat-depth").textContent = "1 frame";
+  document.getElementById("stat-depth").className = "stat-val good";
+  document.getElementById("stat-bigo").textContent = "O(n)";
+  document.getElementById("stat-bigo").className = "stat-val good";
+
+  // Stack viz — just one frame
+  const sv = document.getElementById("stack-vis");
+  sv.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "frame";
+  div.style.cssText = `background:#0D7377;width:60%;`;
+  div.innerHTML = `<span class="frame-label">fibIterative(${n})</span><span class="frame-depth">only 1 frame!</span>`;
+  sv.appendChild(div);
+
+  // Trace
+  let trace = `// Iterative: no recursion, no stack growth\nlet a = 0, b = 1;\n\n`;
+  const maxShow = Math.min(n, 10);
+  let a = 0, b = 1;
+  for (let i = 2; i <= maxShow; i++) {
+    trace += `step ${i-1}: [a, b] = [${b}, ${a+b}]\n`;
+    [a, b] = [b, a + b];
+  }
+  if (n > 10) trace += `... (${n - 10} more steps) ...\n`;
+  trace += `\nresult = ${result}`;
+  document.getElementById("call-tree").textContent = trace;
+
+  document.getElementById("output-line").textContent =
+    `fib(${n}) = ${result}  |  steps: ${steps}  |  stack depth: 1  |  O(n) time, O(1) space ✅`;
+}
+
+function clearAll(resetInput = true) {
+  if (resetInput) document.getElementById("n-input").value = 10;
+  document.getElementById("stack-vis").innerHTML = '<div class="stack-empty">Run the visualizer to see the call stack</div>';
+  document.getElementById("call-tree").textContent = "Run the visualizer to see the call tree…";
+  document.getElementById("output-line").textContent = "Enter a value and click Run…";
+  document.getElementById("error-banner").style.display = "none";
+  ["stat-result","stat-calls","stat-depth","stat-bigo"].forEach(id => {
+    document.getElementById(id).textContent = "—";
+    document.getElementById(id).className = "stat-val";
+  });
+}
+
+// Enter key support
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("n-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") runRecursive();
+  });
+});
+</script>
+</body>
+</html>
