@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Leaderboard — filter · sort · map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --navy: #0F1B35;
+    --navy2: #1A2C5B;
+    --navy3: #1E3460;
+    --gold: #F5A623;
+    --teal: #0D7377;
+    --teal2: #14A098;
+    --green: #3DDC84;
+    --red: #E74C3C;
+    --yellow: #F9E547;
+    --purple: #7C3AED;
+    --orange: #D97706;
+    --white: #FFFFFF;
+    --light: #E8EEF7;
+    --mid: #8BA3C7;
+    --panel: #12234A;
+    --dark: #060F22;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--navy); color: var(--white); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  header {
+    background: var(--gold);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--navy); }
+  header span { font-size: 13px; font-weight: 600; color: var(--navy); opacity: 0.7; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 16px;
+    padding: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid #2A3F6F;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .panel-title {
+    font-size: 12px; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px;
+  }
+
+  /* Filter + Sort controls */
+  .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .control-label { font-size: 12px; color: var(--mid); width: 46px; flex-shrink: 0; }
+
+  .toggle-btn {
+    padding: 5px 14px; border-radius: 20px; border: 1px solid #3A5080;
+    background: var(--navy3); color: var(--mid); font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .toggle-btn:hover { color: var(--white); border-color: var(--teal); }
+  .toggle-btn.active-teal { background: var(--teal); color: var(--white); border-color: var(--teal); }
+  .toggle-btn.active-purple { background: var(--purple); color: var(--white); border-color: var(--purple); }
+
+  /* Leaderboard table */
+  .lb-header {
+    display: grid; grid-template-columns: 40px 1fr 70px 120px 80px;
+    gap: 8px; padding: 8px 12px;
+    background: var(--navy2); border-radius: 6px 6px 0 0;
+    font-size: 10px; font-weight: 700; color: var(--mid);
+    text-transform: uppercase; letter-spacing: 0.4px;
+    margin-top: 12px;
+  }
+  .lb-rows { display: flex; flex-direction: column; gap: 2px; }
+
+  .lb-row {
+    display: grid; grid-template-columns: 40px 1fr 70px 120px 80px;
+    gap: 8px; padding: 9px 12px; border-radius: 6px;
+    background: var(--navy3); border: 1px solid transparent;
+    align-items: center; transition: all 0.2s;
+    animation: fadeRow 0.25s ease;
+  }
+  @keyframes fadeRow { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .lb-row.top1 { border-color: #B8860B; background: #1A2D0A; }
+  .lb-row.top2 { border-color: #707070; background: #1E2A3A; }
+  .lb-row.top3 { border-color: #7C4A1E; background: #1E2010; }
+  .lb-row.inactive { opacity: 0.5; }
+
+  .medal { font-size: 18px; text-align: center; }
+  .rank-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--mid); text-align: center; }
+
+  .player-name { font-size: 14px; font-weight: 600; }
+  .player-grade {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    border-radius: 10px; font-size: 10px; font-weight: 700;
+  }
+
+  .score-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; text-align: center; }
+
+  .score-bar-wrap { position: relative; height: 18px; background: #0C1A38; border-radius: 9px; overflow: hidden; }
+  .score-bar { height: 100%; border-radius: 9px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+  .score-bar-label {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.7);
+  }
+
+  .status-badge {
+    padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-align: center;
+  }
+  .status-active { background: #0D2A1A; color: var(--green); border: 1px solid var(--green); }
+  .status-inactive { background: #2A0A0A; color: var(--red); border: 1px solid var(--red); }
+
+  .empty-state { padding: 24px; text-align: center; color: var(--mid); font-style: italic; font-size: 13px; }
+
+  /* Generated code */
+  #code-display {
+    background: var(--dark); border: 1px solid #2A3F6F; border-radius: 6px;
+    padding: 12px; font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; line-height: 1.8; margin-top: 14px;
+    max-height: 180px; overflow-y: auto;
+  }
+  .code-comment { color: #5A7AA8; font-style: italic; }
+  .code-keyword { color: var(--gold); }
+  .code-fn { color: #79C0FF; }
+  .code-str { color: var(--yellow); }
+  .code-num { color: #79C0FF; }
+  .code-op { color: var(--mid); }
+
+  /* Stats */
+  .stats-row { display: flex; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+  .stat-chip {
+    background: var(--navy3); border: 1px solid #2A3F6F; border-radius: 6px;
+    padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; flex: 1;
+  }
+  .stat-chip-label { font-size: 10px; color: var(--mid); text-transform: uppercase; }
+  .stat-chip-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+
+  /* Right panel: player editor */
+  .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .add-form { display: flex; flex-direction: column; gap: 8px; }
+  .form-row { display: flex; gap: 8px; align-items: center; }
+  .form-label { font-size: 12px; color: var(--mid); width: 52px; flex-shrink: 0; }
+  input[type="text"], input[type="number"] {
+    background: var(--navy3); border: 1px solid #3A5080; border-radius: 6px;
+    color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    padding: 6px 10px; outline: none; flex: 1;
+  }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: var(--teal2); }
+  select {
+    background: var(--navy3); border: 1px solid #3A5080; border-radius: 6px;
+    color: var(--white); font-family: 'Inter', sans-serif; font-size: 13px;
+    padding: 6px 10px; outline: none; flex: 1; cursor: pointer;
+  }
+
+  .btn { padding: 7px 16px; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-add { background: var(--teal); color: var(--white); width: 100%; margin-top: 4px; }
+  .btn-add:hover { background: var(--teal2); }
+  .btn-reset { background: var(--navy3); color: var(--mid); border: 1px solid #3A5080; }
+  .btn-reset:hover { color: var(--white); }
+
+  /* Player list in editor */
+  .player-list { display: flex; flex-direction: column; gap: 4px; max-height: 280px; overflow-y: auto; }
+  .player-item {
+    display: flex; align-items: center; gap: 8px; background: var(--navy3);
+    border: 1px solid #2A3F6F; border-radius: 6px; padding: 7px 10px;
+  }
+  .player-item-name { flex: 1; font-size: 13px; font-weight: 600; }
+  .player-item-score { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--gold); }
+  .btn-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 15px; padding: 0 4px; opacity: 0.7; }
+  .btn-del:hover { opacity: 1; }
+  .btn-toggle-status {
+    padding: 2px 8px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: 10px; font-weight: 700; transition: all 0.15s;
+  }
+
+  /* Challenge cards */
+  .challenge-list { display: flex; flex-direction: column; gap: 8px; }
+  .challenge-card {
+    background: var(--navy3); border-radius: 6px; padding: 10px 12px;
+    border-left: 3px solid var(--teal); cursor: pointer; transition: all 0.15s;
+  }
+  .challenge-card:hover { background: #243A6A; transform: translateX(3px); }
+  .challenge-card h4 { font-size: 12px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+  .challenge-card p { font-size: 11px; color: var(--mid); line-height: 1.4; }
+  .challenge-card.c2 { border-left-color: var(--purple); }
+  .challenge-card.c3 { border-left-color: var(--orange); }
+  .challenge-card.c4 { border-left-color: var(--green); }
+
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏆 Live Leaderboard — filter · sort · map</h1>
+  <span>CIST 0265 OOP — Week 8</span>
+</header>
+
+<div class="layout">
+
+  <!-- Left: leaderboard -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">Controls</div>
+
+      <div class="control-row">
+        <span class="control-label">Show:</span>
+        <button class="toggle-btn" id="show-all" onclick="setFilter('all')">All</button>
+        <button class="toggle-btn active-teal" id="show-active" onclick="setFilter('active')">Active only</button>
+        <button class="toggle-btn" id="show-top3" onclick="setFilter('top3')">Top 3</button>
+        <button class="toggle-btn" id="show-threshold" onclick="setFilter('threshold')">Score &gt; 60</button>
+      </div>
+      <div class="control-row">
+        <span class="control-label">Sort:</span>
+        <button class="toggle-btn active-purple" id="sort-score-desc" onclick="setSort('score-desc')">Score ↓</button>
+        <button class="toggle-btn" id="sort-score-asc" onclick="setSort('score-asc')">Score ↑</button>
+        <button class="toggle-btn" id="sort-name" onclick="setSort('name')">Name A–Z</button>
+      </div>
+
+      <div class="lb-header">
+        <span>#</span><span>Player</span><span>Score</span><span>Bar</span><span>Status</span>
+      </div>
+      <div class="lb-rows" id="lb-rows"></div>
+
+      <div id="code-display"></div>
+
+      <div class="stats-row">
+        <div class="stat-chip"><span class="stat-chip-label">Total players</span><span class="stat-chip-val" id="s-total">—</span></div>
+        <div class="stat-chip"><span class="stat-chip-label">Shown</span><span class="stat-chip-val" id="s-shown">—</span></div>
+        <div class="stat-chip"><span class="stat-chip-label">Avg score</span><span class="stat-chip-val" id="s-avg">—</span></div>
+        <div class="stat-chip"><span class="stat-chip-label">Top score</span><span class="stat-chip-val" id="s-top">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: editor + challenges -->
+  <div class="right-panel">
+    <div class="panel">
+      <div class="panel-title">Add Player</div>
+      <div class="add-form">
+        <div class="form-row">
+          <span class="form-label">Name</span>
+          <input type="text" id="new-name" placeholder="e.g. Frank" maxlength="20">
+        </div>
+        <div class="form-row">
+          <span class="form-label">Score</span>
+          <input type="number" id="new-score" placeholder="0–100" min="0" max="100" value="75">
+        </div>
+        <div class="form-row">
+          <span class="form-label">Status</span>
+          <select id="new-status">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+        <button class="btn btn-add" onclick="addPlayer()">＋ Add to Array</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+        Players Array
+        <button class="btn btn-reset" onclick="resetPlayers()">↺ Reset</button>
+      </div>
+      <div class="player-list" id="player-list"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">In-Class Challenges</div>
+      <div class="challenge-list">
+        <div class="challenge-card c1" onclick="applyChallenge(1)">
+          <h4>#1 — Add a player</h4>
+          <p>Click to add "Frank" (score 82, active). Does the chain update automatically?</p>
+        </div>
+        <div class="challenge-card c2" onclick="applyChallenge(2)">
+          <h4>#2 — Sort by name A–Z</h4>
+          <p>Switch to Name sort. See how localeCompare() handles string ordering.</p>
+        </div>
+        <div class="challenge-card c3" onclick="applyChallenge(3)">
+          <h4>#3 — Add a score threshold</h4>
+          <p>Filter to show only players scoring &gt; 60. Chain a second .filter() call.</p>
+        </div>
+        <div class="challenge-card c4" onclick="applyChallenge(4)">
+          <h4>#4 — Add letter grades</h4>
+          <p>map() adds a grade property: A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, F below.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let players = [
+  { id: 1, name: "Ada",  score: 91, active: true  },
+  { id: 2, name: "Bob",  score: 44, active: false },
+  { id: 3, name: "Cam",  score: 78, active: true  },
+  { id: 4, name: "Dia",  score: 55, active: false },
+  { id: 5, name: "Eve",  score: 88, active: true  },
+];
+let nextId = 6;
+let currentFilter = "active";
+let currentSort = "score-desc";
+let showGrades = false;
+let filterThreshold = false;
+
+function getGrade(score) {
+  if (score >= 90) return { letter: "A", color: "#1A2D0A", text: "#3DDC84" };
+  if (score >= 80) return { letter: "B", color: "#1A2A0A", text: "#7FBA00" };
+  if (score >= 70) return { letter: "C", color: "#2A2A0A", text: "#F9E547" };
+  if (score >= 60) return { letter: "D", color: "#2A1A0A", text: "#F5A623" };
+  return { letter: "F", color: "#2A0A0A", text: "#E74C3C" };
+}
+
+function getBarColor(score, rank) {
+  if (rank === 0) return "#C9A800";
+  if (rank === 1) return "#909090";
+  if (rank === 2) return "#9B6830";
+  return "#0D7377";
+}
+
+function buildChain() {
+  // Start with copy
+  let chain = [...players];
+  const steps = [];
+
+  // Filter step
+  if (currentFilter === "active") {
+    chain = chain.filter(p => p.active);
+    steps.push({ fn: "filter", arg: "p => p.active", color: "#0D7377" });
+  } else if (currentFilter === "top3") {
+    chain = chain.filter(p => p.active);
+    steps.push({ fn: "filter", arg: "p => p.active", color: "#0D7377" });
+  } else if (currentFilter === "threshold") {
+    chain = chain.filter(p => p.score > 60);
+    steps.push({ fn: "filter", arg: "p => p.score > 60", color: "#0D7377" });
+  }
+
+  // Sort step
+  if (currentSort === "score-desc") {
+    chain = chain.sort((a, b) => b.score - a.score);
+    steps.push({ fn: "sort", arg: "(a, b) => b.score - a.score", color: "#7C3AED" });
+  } else if (currentSort === "score-asc") {
+    chain = chain.sort((a, b) => a.score - b.score);
+    steps.push({ fn: "sort", arg: "(a, b) => a.score - b.score", color: "#7C3AED" });
+  } else {
+    chain = chain.sort((a, b) => a.name.localeCompare(b.name));
+    steps.push({ fn: "sort", arg: "(a, b) => a.name.localeCompare(b.name)", color: "#7C3AED" });
+  }
+
+  // Top3 slice
+  if (currentFilter === "top3") {
+    chain = chain.slice(0, 3);
+    steps.push({ fn: "slice", arg: "0, 3", color: "#D97706" });
+  }
+
+  // Map with rank
+  chain = chain.map((p, i) => ({
+    ...p,
+    rank: i + 1,
+    grade: showGrades ? getGrade(p.score) : null,
+  }));
+  if (showGrades) {
+    steps.push({ fn: "map", arg: "(p, i) => ({ ...p, rank: i+1, grade: getGrade(p.score) })", color: "#D97706" });
+  } else {
+    steps.push({ fn: "map", arg: "(p, i) => ({ ...p, rank: i + 1 })", color: "#D97706" });
+  }
+
+  return { result: chain, steps };
+}
+
+function renderLeaderboard() {
+  const { result, steps } = buildChain();
+
+  const container = document.getElementById("lb-rows");
+  container.innerHTML = "";
+
+  if (result.length === 0) {
+    container.innerHTML = '<div class="empty-state">No players match the current filter</div>';
+  }
+
+  result.forEach((p, i) => {
+    const rowClass = i === 0 ? "top1" : i === 1 ? "top2" : i === 2 ? "top3" : "";
+    const inactiveClass = !p.active ? " inactive" : "";
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
+    const barColor = getBarColor(p.score, i);
+    const gradeHtml = p.grade
+      ? `<span class="player-grade" style="background:${p.grade.color};color:${p.grade.text}">${p.grade.letter}</span>`
+      : "";
+
+    const row = document.createElement("div");
+    row.className = `lb-row ${rowClass}${inactiveClass}`;
+    row.innerHTML = `
+      <span class="${medal ? 'medal' : 'rank-num'}">${medal || p.rank}</span>
+      <span class="player-name">${p.name}${gradeHtml}</span>
+      <span class="score-val" style="color:${i===0?'var(--gold)':i<3?'var(--white)':'var(--mid)'}">${p.score}</span>
+      <div class="score-bar-wrap">
+        <div class="score-bar" style="width:${p.score}%;background:${barColor}"></div>
+        <span class="score-bar-label">${p.score}%</span>
+      </div>
+      <span class="status-badge ${p.active ? 'status-active' : 'status-inactive'}">${p.active ? 'active' : 'inactive'}</span>
+    `;
+    container.appendChild(row);
+  });
+
+  // Render code
+  const codeEl = document.getElementById("code-display");
+  let html = `<span class="code-keyword">const</span> leaderboard = players\n`;
+  steps.forEach(st => {
+    html += `  <span class="code-fn" style="color:${st.color}">.${st.fn}</span>(<span class="code-op">${escHtml(st.arg)}</span>)\n`;
+  });
+  codeEl.innerHTML = html;
+
+  // Stats
+  document.getElementById("s-total").textContent = players.length;
+  document.getElementById("s-shown").textContent = result.length;
+  const avg = result.length ? Math.round(result.reduce((s, p) => s + p.score, 0) / result.length) : "—";
+  document.getElementById("s-avg").textContent = avg;
+  const top = result.length ? result[0].score : "—";
+  document.getElementById("s-top").textContent = top;
+
+  // Player editor list
+  renderPlayerList();
+}
+
+function renderPlayerList() {
+  const list = document.getElementById("player-list");
+  list.innerHTML = "";
+  players.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "player-item";
+    item.innerHTML = `
+      <span class="player-item-name">${p.name}</span>
+      <span class="player-item-score">${p.score}</span>
+      <button class="btn-toggle-status" onclick="toggleStatus(${p.id})"
+        style="background:${p.active?'#0D2A1A':'#2A0A0A'};color:${p.active?'var(--green)':'var(--red)'};border:1px solid ${p.active?'var(--green)':'var(--red)'}">
+        ${p.active ? 'active' : 'inactive'}
+      </button>
+      <button class="btn-del" onclick="removePlayer(${p.id})" title="Remove">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  ["all","active","top3","threshold"].forEach(id => {
+    const btn = document.getElementById(`show-${id}`);
+    if (btn) btn.className = "toggle-btn" + (id === f ? " active-teal" : "");
+  });
+  renderLeaderboard();
+}
+
+function setSort(s) {
+  currentSort = s;
+  ["score-desc","score-asc","name"].forEach(id => {
+    const btn = document.getElementById(`sort-${id}`);
+    if (btn) btn.className = "toggle-btn" + (id === s ? " active-purple" : "");
+  });
+  renderLeaderboard();
+}
+
+function addPlayer() {
+  const name = document.getElementById("new-name").value.trim();
+  const score = parseInt(document.getElementById("new-score").value);
+  const active = document.getElementById("new-status").value === "true";
+  if (!name) { alert("Enter a name"); return; }
+  if (isNaN(score) || score < 0 || score > 100) { alert("Score must be 0–100"); return; }
+  players.push({ id: nextId++, name, score, active });
+  document.getElementById("new-name").value = "";
+  renderLeaderboard();
+}
+
+function removePlayer(id) {
+  players = players.filter(p => p.id !== id);
+  renderLeaderboard();
+}
+
+function toggleStatus(id) {
+  const p = players.find(p => p.id === id);
+  if (p) { p.active = !p.active; renderLeaderboard(); }
+}
+
+function resetPlayers() {
+  players = [
+    { id: 1, name: "Ada",  score: 91, active: true  },
+    { id: 2, name: "Bob",  score: 44, active: false },
+    { id: 3, name: "Cam",  score: 78, active: true  },
+    { id: 4, name: "Dia",  score: 55, active: false },
+    { id: 5, name: "Eve",  score: 88, active: true  },
+  ];
+  nextId = 6; showGrades = false;
+  setFilter("active"); setSort("score-desc");
+}
+
+function applyChallenge(n) {
+  if (n === 1) {
+    players.push({ id: nextId++, name: "Frank", score: 82, active: true });
+    renderLeaderboard();
+  } else if (n === 2) {
+    setSort("name");
+  } else if (n === 3) {
+    setFilter("threshold");
+  } else if (n === 4) {
+    showGrades = true;
+    renderLeaderboard();
+  }
+}
+
+// Init
+renderLeaderboard();
+</script>
+</body>
+</html>

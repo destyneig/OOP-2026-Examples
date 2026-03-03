@@ -1,0 +1,12 @@
+{
+  "name": "week8-chapter03-arrays",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chapter 3 Arrays examples with an interactive main menu",
+  "main": "main-menu.js",
+  "scripts": {
+    "start": "node main-menu.js",
+    "menu": "node main-menu.js",
+    "list": "node main-menu.js --list"
+  }
+}

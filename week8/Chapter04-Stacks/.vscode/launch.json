@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Chapter 4 Main Menu",
+      "program": "${workspaceFolder}/week8/Chapter04-Stacks/main-menu.js",
+      "console": "integratedTerminal"
+    }
+  ]
+}
