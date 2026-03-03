@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj": {}
+    "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj": {}
   },
   "projects": {
-    "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj": {
+    "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
+        "projectUniqueName": "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
         "projectName": "OopOrganization.Chapter7",
-        "projectPath": "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
-        "packagesPath": "C:\\Users\\karnov\\.nuget\\packages\\",
-        "outputPath": "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\obj\\",
+        "projectPath": "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
+        "packagesPath": "C:\\Users\\DNG34\\.nuget\\packages\\",
+        "outputPath": "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "X:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\karnov\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\DNG34\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -29,7 +27,7 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://www.nuget.org/api/v2/": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
@@ -63,30 +61,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.23, 8.0.23]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.23, 8.0.23]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.23, 8.0.23]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.23, 8.0.23]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

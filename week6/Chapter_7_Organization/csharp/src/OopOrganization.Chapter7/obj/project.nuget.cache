@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aF9qVZjTi/c=",
+  "dgSpecHash": "BnaKHmWapEo=",
   "success": true,
-  "projectFilePath": "F:\\Github\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\karnov\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.23\\microsoft.netcore.app.ref.8.0.23.nupkg.sha512",
-    "C:\\Users\\karnov\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.23\\microsoft.windowsdesktop.app.ref.8.0.23.nupkg.sha512",
-    "C:\\Users\\karnov\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.23\\microsoft.aspnetcore.app.ref.8.0.23.nupkg.sha512",
-    "C:\\Users\\karnov\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.23\\microsoft.netcore.app.host.win-x64.8.0.23.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\GitHub\\Object Oriented Programing\\OOP-2026-Examples\\week6\\Chapter_7_Organization\\csharp\\src\\OopOrganization.Chapter7\\OopOrganization.Chapter7.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }
